@@ -3,9 +3,12 @@ package controller;
 // NoticiaController.java
 import modelo.Noticia;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import service.NoticiaService;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,22 +28,28 @@ public class NoticiaController {
     }
 
     @GetMapping("/{id}")
-    public Noticia getNoticiaById(@PathVariable Long id) {
-        return noticiaService.getNoticiaById(id);
+    public ResponseEntity<Noticia> getNoticiaById(@PathVariable Long id) {
+        Noticia noticia = noticiaService.getNoticiaById(id);
+        return ResponseEntity.ok().body(noticia);
     }
 
     @PostMapping
-    public Noticia createNoticia(@RequestBody Noticia noticia) {
-        return noticiaService.createNoticia(noticia);
+    public ResponseEntity<Noticia> createNoticia(@Valid @RequestBody Noticia noticia) {
+        Noticia nuevaNoticia = noticiaService.createNoticia(noticia);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(nuevaNoticia.getId()).toUri();
+        return ResponseEntity.created(location).body(nuevaNoticia);
     }
 
     @PutMapping("/{id}")
-    public Noticia updateNoticia(@PathVariable Long id, @RequestBody Noticia noticia) {
-        return noticiaService.updateNoticia(id, noticia);
+    public ResponseEntity<Noticia> updateNoticia(@PathVariable Long id, @Valid @RequestBody Noticia noticia) {
+        Noticia noticiaActualizada = noticiaService.updateNoticia(id, noticia);
+        return ResponseEntity.ok().body(noticiaActualizada);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteNoticia(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNoticia(@PathVariable Long id) {
         noticiaService.deleteNoticia(id);
+        return ResponseEntity.noContent().build();
     }
 }
